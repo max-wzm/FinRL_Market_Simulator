@@ -60,7 +60,7 @@ def train_ppo_a2c_for_order_execution_vec_env():
     args.random_seed = GPU_ID
     args.num_workers = 2
 
-    if_check = True
+    if_check = False
     if if_check:
         train_agent(args)
     else:

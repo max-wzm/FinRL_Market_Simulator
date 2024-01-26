@@ -261,6 +261,7 @@ class PipeLearner:
 
         if_train = True
         while if_train:
+            print("training...")
             buffer_items, last_state = comm_exp.explore(agent)
             exp_r = buffer_items[2].mean().item()
             buffer[:] = buffer_items
