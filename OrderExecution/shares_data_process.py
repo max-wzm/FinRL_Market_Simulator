@@ -77,6 +77,15 @@ def get_share_dicts_by_day(share_dir='./shares_data_by_day', share_name='000520_
 
 
 def csv_to_tensor_dict(csv_path: str, device, n_levels: int = 5):
+    """
+    convert a csv file into a dict.
+
+    with keys:
+        - price
+        - volume
+        - value (turnover)
+        - ask/bid prices/volumesx
+    """
     df = pandas.read_csv(csv_path)
 
     def get_tensor(ary):

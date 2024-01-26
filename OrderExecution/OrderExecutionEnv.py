@@ -55,7 +55,7 @@ class OrderExecutionVecEnv:
     """
 
     def __init__(self, num_envs: int = 4, gpu_id: int = 0, if_random=False,
-                 share_name: str = '000768_XSHE', beg_date: str = '2022-09-01', end_date: str = '2022-09-03', ):
+                 share_name: str = '000629.SZ', beg_date: str = '2020-08-03', end_date: str = '2002-08-31', ):
         self.if_random = if_random  # 设计随机的 reset，能让策略在更多样的state下学习，会提高策略泛化能力。
         self.num_levels = 5  # 从10档行情中，选出 n_levels 个档位 用于仿真
         self.price_scale = 25  # 策略网络输出的第一个动作特征，是订单的卖出价格与上一时刻的变化量，表示30个档位
@@ -86,13 +86,13 @@ class OrderExecutionVecEnv:
         self.total_quantity = torch.zeros(0)  # 订单执行的目标成交量（希望在一天内达成这个目标成交量）
 
         self.data_dicts = self.load_share_data_dicts(
-            data_dir='./shares_data_by_day', share_name=share_name,
+            data_dir='/data/home/mackswang/FinRL_Market_Simulator/data', share_name=share_name,
             beg_date=beg_date, end_date=end_date)
 
         '''reset'''
         self.t = 0  # 时刻t
         self.cash = torch.zeros(0)  # 现金，不需要加入的state里，因为我们只卖出，不买入
-        self.quantity = torch.zeros(0)  # 基础成交量
+        self.quantity = torch.zeros(0)  # 基础成交量, final
         self.total_asset = torch.zeros(0)  # 总资产，总资产等于现金+商品折算为现金。（在订单执行任务里，商品折算为0现金）
         self.remain_quantity = torch.zeros(0)  # 剩余成交量，智能体需要就是把商品都卖出，让它在最后变成0
 
@@ -127,6 +127,9 @@ class OrderExecutionVecEnv:
         return self.data_dicts[self.rand_id]  # data_dict
 
     def reset(self):
+        """
+        reset based on a random date of the given share
+        """
         self.t = 0
 
         '''load data from data_dict to device'''
@@ -287,7 +290,11 @@ class OrderExecutionVecEnv:
                               share_name: str = '000768_XSHE',
                               beg_date='2022-09-01',
                               end_date='2022-09-30'):
-        assert share_name in {'000768_XSHE', '000685_XSHE'}
+        """
+        returns data dict (csv) for a given share in a date interval
+        with no update_time?
+        """
+        # assert share_name in {'000768_XSHE', '000685_XSHE'}
         share_dir = f"{data_dir}/{share_name}"
         share_dicts = get_share_dicts_by_day(share_dir=share_dir, share_name=share_name,
                                              beg_date=beg_date, end_date=end_date,
@@ -689,9 +696,9 @@ def get_ts_trends(ten, win_size=6, gap_size=6):
 
 def check_with_twap():
     num_envs = 2
-    share_name = ['000768_XSHE', '000685_XSHE'][0]
-    beg_date = '2022-09-01'
-    end_date = '2022-09-01'
+    share_name = ['000629.SZ', '000685_XSHE'][0]
+    beg_date = '2020-08-03'
+    end_date = '2020-08-31'
 
     # env = OrderExecutionVecEnv(num_envs=num_envs, gpu_id=0, if_random=False,
     #                            share_name=share_name, beg_date=beg_date, end_date=end_date)

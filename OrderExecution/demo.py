@@ -23,9 +23,9 @@ def train_ppo_a2c_for_order_execution_vec_env():
                 'action_dim': 2,
                 'if_discrete': False,
 
-                'share_name': '000768_XSHE',
-                'beg_date': '2022-06-09',
-                'end_date': '2022-09-09',
+                'share_name': '000629.SZ',
+                'beg_date': '2020-08-03',
+                'end_date': '2020-08-31',
                 'if_random': False}
     if not env_args:
         get_gym_env_args(env=OrderExecutionVecEnv(), if_print=True)  # return env_args
@@ -52,15 +52,15 @@ def train_ppo_a2c_for_order_execution_vec_env():
     args.eval_env_args = env_args.copy()
     args.eval_env_args['num_envs'] = eval_num_envs
     args.eval_env_args['max_step'] = 4000 * 22
-    args.eval_env_args['beg_date'] = '2022-09-10'
-    args.eval_env_args['end_date'] = '2022-10-10'
+    args.eval_env_args['beg_date'] = '2020-08-03'
+    args.eval_env_args['end_date'] = '2020-08-31'
 
     args.gpu_id = GPU_ID
     args.eval_gpu_id = GPU_ID
     args.random_seed = GPU_ID
     args.num_workers = 2
 
-    if_check = False
+    if_check = True
     if if_check:
         train_agent(args)
     else:
@@ -227,5 +227,5 @@ def train_ppo_a2c_for_bipedal_walker_vec_env():
 
 if __name__ == '__main__':
     GPU_ID = int(sys.argv[1]) if len(sys.argv) > 1 else 0  # >=0 means GPU ID, -1 means CPU
-
+    # GPU_ID = -1
     train_ppo_a2c_for_order_execution_vec_env()
