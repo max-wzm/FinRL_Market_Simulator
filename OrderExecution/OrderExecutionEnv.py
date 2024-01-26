@@ -55,7 +55,7 @@ class OrderExecutionVecEnv:
     """
 
     def __init__(self, num_envs: int = 4, gpu_id: int = 0, if_random=False,
-                 share_name: str = '000629.SZ', beg_date: str = '2020-08-03', end_date: str = '2002-08-31', ):
+                 share_name: str = '000629.SZ', beg_date: str = '2020-08-03', end_date: str = '2020-08-31', ):
         self.if_random = if_random  # 设计随机的 reset，能让策略在更多样的state下学习，会提高策略泛化能力。
         self.num_levels = 5  # 从10档行情中，选出 n_levels 个档位 用于仿真
         self.price_scale = 25  # 策略网络输出的第一个动作特征，是订单的卖出价格与上一时刻的变化量，表示30个档位
@@ -70,7 +70,7 @@ class OrderExecutionVecEnv:
         '''device'''
         self.device = torch.device(f"cuda:{gpu_id}" if (torch.cuda.is_available() and (gpu_id >= 0)) else "cpu")
         # 为Vectorized Env 指定单张GPU设备进行并行计算
-
+        print(self.device)
         '''load data'''
         self.max_len = None  # 赋值为None，会在不调用env.reset() 就运行step的情况下，会主动引发可预见的错误
         self.share_name = share_name  # 当前被随机抽取出来的股票的名字
@@ -86,7 +86,7 @@ class OrderExecutionVecEnv:
         self.total_quantity = torch.zeros(0)  # 订单执行的目标成交量（希望在一天内达成这个目标成交量）
 
         self.data_dicts = self.load_share_data_dicts(
-            data_dir='/data/home/mackswang/FinRL_Market_Simulator/data', share_name=share_name,
+            data_dir='/home/u200110611/FinRL_Market_Simulator/data', share_name=share_name,
             beg_date=beg_date, end_date=end_date)
 
         '''reset'''
@@ -286,7 +286,7 @@ class OrderExecutionVecEnv:
         torch.nan_to_num_(tech_factors, nan=0.0, posinf=0.0, neginf=0.0)
         return tech_factors
 
-    def load_share_data_dicts(self, data_dir="/data/home/mackswang/FinRL_Market_Simulator/data",
+    def load_share_data_dicts(self, data_dir="/home/u200110611/FinRL_Market_Simulator/data",
                               share_name: str = '000629.SZ',
                               beg_date='2020-08-03',
                               end_date='2020-08-31'):
@@ -294,7 +294,7 @@ class OrderExecutionVecEnv:
         returns data dict (csv) for a given share in a date interval
         with no update_time?
         """
-        # assert share_name in {'000629.SZ', '000685_XSHE'}
+        # assert share_name in {'000629.SZ', '000066.SZ'}
         share_dir = f"{data_dir}/{share_name}"
         share_dicts = get_share_dicts_by_day(share_dir=share_dir, share_name=share_name,
                                              beg_date=beg_date, end_date=end_date,
@@ -346,7 +346,7 @@ class OrderExecutionVecEnv:
 
 class OrderExecutionMinuteVecEnv(OrderExecutionVecEnv):
     def __init__(self, num_envs: int = 4, gpu_id: int = 0, if_random=False,
-                 share_name: str = '000629.SZ', beg_date: str = '2020-08-03', end_date: str = '2022-09-03', ):
+                 share_name: str = '000629.SZ', beg_date: str = '2020-08-03', end_date: str = '2020-08-31', ):
         self.exec_level = 16  # 把聚合后的价格分为 exec_level 个档位
         self.num_cluster = 20  # 把num_cluster 个快照聚合成一个，一个快照约3秒，那么 3秒*20=60秒
         self.price_scale = 25  # 策略网络输出的第一个动作特征，是订单的卖出价格与上一时刻的变化量，表示30个档位
@@ -444,11 +444,11 @@ class OrderExecutionMinuteVecEnv(OrderExecutionVecEnv):
     def get_n_state(self):
         return torch.hstack([self.n_state[i] for i in (-1, -2, -4, -8)])
 
-    def load_share_data_dicts(self, data_dir="/data/home/mackswang/FinRL_Market_Simulator/data",
+    def load_share_data_dicts(self, data_dir="/home/u200110611/FinRL_Market_Simulator/data",
                               share_name: str = '000629.SZ',
                               beg_date='2020-08-03',
                               end_date='2020-08-31'):
-        assert share_name in {'000629.SZ', '000685_XSHE'}
+        assert share_name in {'000629.SZ', '000066.SZ'}
         share_dir = f"{data_dir}/{share_name}"
         share_dicts = get_share_dicts_by_day(share_dir=share_dir, share_name=share_name,
                                              beg_date=beg_date, end_date=end_date,
@@ -619,7 +619,7 @@ class OrderExecutionMinuteVecEnv(OrderExecutionVecEnv):
 
 class OrderExecutionVecEnvForEval(OrderExecutionVecEnv):
     def __init__(self, num_envs: int = 4, gpu_id: int = 0, if_random=False,
-                 beg_date: str = '2020-08-03', end_date: str = '2022-09-03', share_name='000685_XSHE'):
+                 beg_date: str = '2020-08-03', end_date: str = '2020-08-31', share_name='000066.SZ'):
         OrderExecutionVecEnv.__init__(self, num_envs=num_envs, gpu_id=gpu_id, if_random=if_random,
                                       beg_date=beg_date, end_date=end_date, share_name=share_name)
 
@@ -696,7 +696,7 @@ def get_ts_trends(ten, win_size=6, gap_size=6):
 
 def check_with_twap():
     num_envs = 2
-    share_name = ['000629.SZ', '000685_XSHE'][0]
+    share_name = ['000629.SZ', '000066.SZ'][0]
     beg_date = '2020-08-03'
     end_date = '2020-08-31'
 

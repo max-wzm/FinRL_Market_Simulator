@@ -227,5 +227,4 @@ def train_ppo_a2c_for_bipedal_walker_vec_env():
 
 if __name__ == '__main__':
     GPU_ID = int(sys.argv[1]) if len(sys.argv) > 1 else 0  # >=0 means GPU ID, -1 means CPU
-    # GPU_ID = -1
     train_ppo_a2c_for_order_execution_vec_env()

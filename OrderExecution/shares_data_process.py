@@ -14,7 +14,7 @@ def get_trade_dates(beg_date: str = '2022.09.01', end_date: str = '2022.09.15') 
 
 
 def get_share_dicts_by_day(share_dir='./shares_data_by_day', share_name='000520_XSHE',
-                           beg_date='2022-09-01', end_date='2022-09-30',
+                           beg_date='2020-08-03', end_date='2022-09-30',
                            n_levels=5, n_days=5, device=None):
     if device is None:
         gpu_id = 0

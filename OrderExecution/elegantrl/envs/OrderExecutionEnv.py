@@ -7,7 +7,7 @@ from shares_data_process import get_share_dicts_by_day
 
 class OrderExecutionVecEnv:
     def __init__(self, num_envs: int = 4, gpu_id: int = 0, if_random=False,
-                 share_name: str = '000768_XSHE', beg_date: str = '2022-09-01', end_date: str = '2022-09-03', ):
+                 share_name: str = '000629.SZ', beg_date: str = '2020-08-03', end_date: str = '2020-08-31', ):
         self.if_random = if_random  # 设计随机的 reset，能让策略在更多样的state下学习，会提高策略泛化能力。
         self.num_levels = 5  # 从10档行情中，选出 n_levels 个档位 用于仿真
         self.price_scale = 25  # 策略网络输出的第一个动作特征，是订单的卖出价格与上一时刻的变化量，表示30个档位
@@ -236,10 +236,10 @@ class OrderExecutionVecEnv:
         return tech_factors
 
     def load_share_data_dicts(self, data_dir="./data",
-                              share_name: str = '000768_XSHE',
-                              beg_date='2022-09-01',
+                              share_name: str = '000629.SZ',
+                              beg_date='2020-08-03',
                               end_date='2022-09-30'):
-        assert share_name in {'000768_XSHE', '000685_XSHE'}
+        assert share_name in {'000629.SZ', '000066.SZ'}
         share_dir = f"{data_dir}/{share_name}"
         share_dicts = get_share_dicts_by_day(share_dir=share_dir, share_name=share_name,
                                              beg_date=beg_date, end_date=end_date,
@@ -291,7 +291,7 @@ class OrderExecutionVecEnv:
 
 class OrderExecutionVecEnvForEval(OrderExecutionVecEnv):
     def __init__(self, num_envs: int = 4, gpu_id: int = 0, if_random=False,
-                 beg_date: str = '2022-09-01', end_date: str = '2022-09-03', share_name='000685_XSHE'):
+                 beg_date: str = '2020-08-03', end_date: str = '2020-08-31', share_name='000066.SZ'):
         OrderExecutionVecEnv.__init__(self, num_envs=num_envs, gpu_id=gpu_id, if_random=if_random,
                                       beg_date=beg_date, end_date=end_date, share_name=share_name)
 
@@ -368,9 +368,9 @@ def get_ts_trends(ten, win_size=6, gap_size=6):
 
 def check_with_twap():
     num_envs = 2
-    share_name = ['000768_XSHE', '000685_XSHE'][0]
-    beg_date = '2022-09-01'
-    end_date = '2022-09-01'
+    share_name = ['000629.SZ', '000066.SZ'][0]
+    beg_date = '2020-08-03'
+    end_date = '2020-08-03'
 
     # env = OrderExecutionVecEnv(num_envs=num_envs, gpu_id=0, if_random=False,
     #                            share_name=share_name, beg_date=beg_date, end_date=end_date)
