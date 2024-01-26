@@ -93,12 +93,12 @@ def csv_to_tensor_dict(csv_path: str, device, n_levels: int = 5):
 
     '''get delta volume'''
     volume = get_tensor(df['Volume'].values)
-    volume[1:] = torch.diff(volume, n=1)  # delta volume
+    # volume[1:] = torch.diff(volume, n=1)  # delta volume
     torch.nan_to_num_(volume, nan=0)
 
     '''get delta turnover (value)'''
     value = get_tensor(df['turnover'].values)
-    value[1:] = torch.diff(value, n=1)  # delta turnover (value)
+    # value[1:] = torch.diff(value, n=1)  # delta turnover (value)
     torch.nan_to_num_(value, nan=0)
 
     '''get last price'''

@@ -3,7 +3,7 @@ import torch
 from random import shuffle
 from functorch import vmap
 from shares_data_process import get_share_dicts_by_day
-
+from loguru import logger
 """
 Readme 写于 2022-11-08 17:28:39
 
@@ -55,7 +55,7 @@ class OrderExecutionVecEnv:
     """
 
     def __init__(self, num_envs: int = 4, gpu_id: int = 0, if_random=False,
-                 share_name: str = '000629.SZ', beg_date: str = '2020-08-03', end_date: str = '2020-08-31', ):
+                 share_name: str = '000066.SZ', beg_date: str = '2020-08-03', end_date: str = '2020-08-31', ):
         self.if_random = if_random  # 设计随机的 reset，能让策略在更多样的state下学习，会提高策略泛化能力。
         self.num_levels = 5  # 从10档行情中，选出 n_levels 个档位 用于仿真
         self.price_scale = 25  # 策略网络输出的第一个动作特征，是订单的卖出价格与上一时刻的变化量，表示30个档位
@@ -134,6 +134,7 @@ class OrderExecutionVecEnv:
 
         '''load data from data_dict to device'''
         data_dict = self.get_data_dict()
+        # logger.info(f"data_dict: {data_dict}")
         self.max_len = data_dict['max_len']
         self.volume = data_dict['volume'].to(self.device)
         self.price = data_dict['last_price'].to(self.device)
@@ -201,6 +202,7 @@ class OrderExecutionVecEnv:
             n_state = self.reset()
         else:
             state = self.get_state()
+            # logger.info(f"new_state_is: {state}")
             self.n_state.append(state)
             del self.n_state[0]
             n_state = self.get_n_state()
@@ -287,14 +289,14 @@ class OrderExecutionVecEnv:
         return tech_factors
 
     def load_share_data_dicts(self, data_dir="/home/u200110611/FinRL_Market_Simulator/data",
-                              share_name: str = '000629.SZ',
+                              share_name: str = '000066.SZ',
                               beg_date='2020-08-03',
                               end_date='2020-08-31'):
         """
         returns data dict (csv) for a given share in a date interval
         with no update_time?
         """
-        # assert share_name in {'000629.SZ', '000066.SZ'}
+        # assert share_name in {'000066.SZ', '000629.SZ'}
         share_dir = f"{data_dir}/{share_name}"
         share_dicts = get_share_dicts_by_day(share_dir=share_dir, share_name=share_name,
                                              beg_date=beg_date, end_date=end_date,
@@ -305,7 +307,7 @@ class OrderExecutionVecEnv:
                     share_dict[key] = value.to(torch.device('cpu'))
 
         data_dicts = []  # 把不同股票的数据放在字典里，reset的时候会随机选择一只股票的数据，加载到GPU里，开始训练
-        print('| OrderExecutionEnv data pre processing:', share_name)
+        logger.info('| OrderExecutionEnv data pre processing:', share_name)
 
         for i, share_dict in enumerate(share_dicts):
             share_name = share_dict['share_name']
@@ -346,7 +348,7 @@ class OrderExecutionVecEnv:
 
 class OrderExecutionMinuteVecEnv(OrderExecutionVecEnv):
     def __init__(self, num_envs: int = 4, gpu_id: int = 0, if_random=False,
-                 share_name: str = '000629.SZ', beg_date: str = '2020-08-03', end_date: str = '2020-08-31', ):
+                 share_name: str = '000066.SZ', beg_date: str = '2020-08-03', end_date: str = '2020-08-31', ):
         self.exec_level = 16  # 把聚合后的价格分为 exec_level 个档位
         self.num_cluster = 20  # 把num_cluster 个快照聚合成一个，一个快照约3秒，那么 3秒*20=60秒
         self.price_scale = 25  # 策略网络输出的第一个动作特征，是订单的卖出价格与上一时刻的变化量，表示30个档位
@@ -445,10 +447,10 @@ class OrderExecutionMinuteVecEnv(OrderExecutionVecEnv):
         return torch.hstack([self.n_state[i] for i in (-1, -2, -4, -8)])
 
     def load_share_data_dicts(self, data_dir="/home/u200110611/FinRL_Market_Simulator/data",
-                              share_name: str = '000629.SZ',
+                              share_name: str = '000066.SZ',
                               beg_date='2020-08-03',
                               end_date='2020-08-31'):
-        assert share_name in {'000629.SZ', '000066.SZ'}
+        assert share_name in {'000066.SZ', '000629.SZ'}
         share_dir = f"{data_dir}/{share_name}"
         share_dicts = get_share_dicts_by_day(share_dir=share_dir, share_name=share_name,
                                              beg_date=beg_date, end_date=end_date,
@@ -459,7 +461,7 @@ class OrderExecutionMinuteVecEnv(OrderExecutionVecEnv):
                     share_dict[key] = value.to(torch.device('cpu'))
 
         data_dicts = []  # 把不同股票的数据放在字典里，reset的时候会随机选择一只股票的数据，加载到GPU里，开始训练
-        print('| OrderExecutionEnv data pre processing:', share_name)
+        logger.info('| OrderExecutionEnv data pre processing:', share_name)
 
         for i, share_dict in enumerate(share_dicts):
             share_name = share_dict['share_name']
@@ -619,7 +621,7 @@ class OrderExecutionMinuteVecEnv(OrderExecutionVecEnv):
 
 class OrderExecutionVecEnvForEval(OrderExecutionVecEnv):
     def __init__(self, num_envs: int = 4, gpu_id: int = 0, if_random=False,
-                 beg_date: str = '2020-08-03', end_date: str = '2020-08-31', share_name='000066.SZ'):
+                 beg_date: str = '2020-08-03', end_date: str = '2020-08-31', share_name='000629.SZ'):
         OrderExecutionVecEnv.__init__(self, num_envs=num_envs, gpu_id=gpu_id, if_random=if_random,
                                       beg_date=beg_date, end_date=end_date, share_name=share_name)
 
@@ -696,14 +698,14 @@ def get_ts_trends(ten, win_size=6, gap_size=6):
 
 def check_with_twap():
     num_envs = 2
-    share_name = ['000629.SZ', '000066.SZ'][0]
+    share_name = ['000066.SZ', '000629.SZ'][0]
     beg_date = '2020-08-03'
     end_date = '2020-08-31'
 
-    # env = OrderExecutionVecEnv(num_envs=num_envs, gpu_id=0, if_random=False,
-    #                            share_name=share_name, beg_date=beg_date, end_date=end_date)
-    env = OrderExecutionMinuteVecEnv(num_envs=num_envs, gpu_id=0, if_random=False,
-                                     share_name=share_name, beg_date=beg_date, end_date=end_date)
+    env = OrderExecutionVecEnv(num_envs=num_envs, gpu_id=0, if_random=False,
+                               share_name=share_name, beg_date=beg_date, end_date=end_date)
+    # env = OrderExecutionMinuteVecEnv(num_envs=num_envs, gpu_id=0, if_random=False,
+    #                                  share_name=share_name, beg_date=beg_date, end_date=end_date)
     env.reset()
 
     action = torch.zeros((num_envs, env.action_dim), dtype=torch.float32, device=env.device)

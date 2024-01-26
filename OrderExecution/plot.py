@@ -134,7 +134,7 @@ def check__ask_price_volume_with_star():
 
     num_envs = 2
     smooth_kernel = 7
-    share_name = ['000629.SZ', '000066.SZ'][1]
+    share_name = ['000066.SZ', '000629.SZ'][1]
     env = OrderExecutionVecEnvForEval(num_envs=num_envs,
                                       beg_date='2022-09-09',
                                       end_date='2022-09-09',

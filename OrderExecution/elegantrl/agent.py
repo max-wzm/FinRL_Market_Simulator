@@ -33,14 +33,18 @@ class ActorPPO(ActorBase):
         self.action_std_log = nn.Parameter(torch.zeros((1, action_dim)), requires_grad=True)  # trainable parameter
 
     def forward(self, state: Tensor) -> Tensor:
+        
         state = self.state_norm(state)
         return self.net(state).tanh()  # action.tanh()
 
     def get_action(self, state: Tensor) -> (Tensor, Tensor):  # for exploration
+        # print(f"original state: {state}")
         state = self.state_norm(state)
         action_avg = self.net(state)
         action_std = self.action_std_log.exp()
-
+        # print(f"state: {state}")
+        # print(f"action_avg: {action_avg}")
+        # print(action_std)
         dist = self.ActionDist(action_avg, action_std)
         action = dist.sample()
         logprob = dist.log_prob(action).sum(1)
@@ -247,6 +251,7 @@ class AgentBase:
             states[t] = state
 
             state, reward, done, _ = env.step(action)  # next_state
+
             actions[t] = action
             rewards[t] = reward
             dones[t] = done

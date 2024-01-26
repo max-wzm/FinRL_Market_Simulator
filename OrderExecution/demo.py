@@ -23,7 +23,7 @@ def train_ppo_a2c_for_order_execution_vec_env():
                 'action_dim': 2,
                 'if_discrete': False,
 
-                'share_name': '000629.SZ',
+                'share_name': '000066.SZ',
                 'beg_date': '2020-08-03',
                 'end_date': '2020-08-31',
                 'if_random': False}
@@ -38,7 +38,7 @@ def train_ppo_a2c_for_order_execution_vec_env():
 
     args.batch_size = args.horizon_len * num_envs // 32
     args.repeat_times = 4  # repeatedly update network using ReplayBuffer to keep critic's loss small
-    args.learning_rate = 1e-4
+    args.learning_rate = 1e-6
     args.state_value_tau = 0.01
 
     eval_num_envs = 16
@@ -60,7 +60,7 @@ def train_ppo_a2c_for_order_execution_vec_env():
     args.random_seed = GPU_ID
     args.num_workers = 2
 
-    if_check = False
+    if_check = True
     if if_check:
         train_agent(args)
     else:

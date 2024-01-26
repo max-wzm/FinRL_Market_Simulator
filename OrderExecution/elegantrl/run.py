@@ -1,6 +1,7 @@
 import os
 import time
 import multiprocessing as mp
+from loguru import logger
 import torch
 import numpy as np
 from copy import deepcopy
@@ -29,6 +30,7 @@ def train_agent(args: Config):
 
     '''init agent.last_state'''
     state = env.reset()
+    # logger.info(f"init_state: {state}， type is {type(env)}")
     if args.num_envs == 1:
         assert state.shape == (args.state_dim,)
         assert isinstance(state, np.ndarray)
@@ -58,6 +60,7 @@ def train_agent(args: Config):
 
     if_train = True
     while if_train:
+        print("training...")
         buffer_items = agent.explore_env(env, horizon_len)
         exp_r = buffer_items[2].mean().item()
         buffer[:] = buffer_items
